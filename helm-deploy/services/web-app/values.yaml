@@ -1,0 +1,107 @@
+global:
+  labels:
+    app: webapp
+
+replicaCount: 1
+
+image:
+  repository: 123456789.dkr.ecr.us-east-1.amazonaws.com/web-app
+  tag: "v1.0.0"
+  pullPolicy: IfNotPresent
+  env:
+    - name: Environment
+      value: "development"
+  envFrom:
+    - secretRef:
+        name: webapp-secret
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "webapp-sa"
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: 
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 80
+  annotations: {}
+  selector:
+    app: webapp
+
+ingress:
+    enabled: true
+    web: false
+    ingressPath: "/"
+    hostname: "app.simplified-synergy.com"
+    host:
+      servicePort: 80
+
+resources: 
+  limits:
+    cpu: 150m
+    memory: 1024Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the output Deployment definition.
+volumes: 
+  - name: certs-params
+    secret:
+      defaultMode: 420
+      secretName: certs-params
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts:
+  - mountPath: /etc/ssl/private-cert
+    name: certs-params
+
+nodeSelector: {}
+#   volume_size: "30G"
+
+tolerations: {}
+  # - key: "key"
+  #   operator: "Equal"
+  #   value: "value"
+  #   effect: "NoSchedule"
+
+affinity: {}
+    # nodeAffinity:
+    #   requiredDuringSchedulingIgnoredDuringExecution:
+    #     nodeSelectorTerms:
+    #       - matchExpressions:
+    #           - key: kubernetes.io/e2e-az-name
+    #             operator: In
+    #             values:
+    #               - e2e-az1
+    #               - e2e-az2  
