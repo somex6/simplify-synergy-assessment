@@ -37,3 +37,6 @@ helm ls
 kubectl get pods
 kubectl get svc
 ```
+
+# Auto Deployment 
+The web-app can also be deployed automatically via the github action pipeline. The configuraton file is located at .github/workflow
